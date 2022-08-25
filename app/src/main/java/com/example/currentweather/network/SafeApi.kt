@@ -75,7 +75,7 @@ object SafeApi {
                 if (syntaxException.message != null) {
                     return Results.Error("${syntaxException.message}")
                 } else {
-                    return Results.Error("Somethig went wrong")
+                    return Results.Error("Something went wrong")
                 }
             } catch (exception: Exception) {
                 exception.printStackTrace()

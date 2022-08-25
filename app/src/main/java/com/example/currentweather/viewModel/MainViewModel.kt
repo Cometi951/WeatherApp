@@ -15,18 +15,17 @@ import kotlinx.coroutines.launch
 import java.text.DecimalFormat
 
 class MainViewModel : ViewModel() {
-    val repository by lazy {
+    private val repository by lazy {
         Repository()
     }
 
-    private val _currentWeather = MutableStateFlow<CurrentWeatherStates>(CurrentWeatherStates.Empty)
+    private val _currentWeather = MutableStateFlow<CurrentWeatherStates>(CurrentWeatherStates.Loading)
     val currentWeather: StateFlow<CurrentWeatherStates> = _currentWeather
 
     fun getCurrentWeather(lat: Double, lon: Double) {
         viewModelScope.launch {
-            val res = repository.getCurrentWeather(lat,lon)
 
-            when (res) {
+            when (val res = repository.getCurrentWeather(lat,lon)) {
                 is Results.Success -> {
                     _currentWeather.value = CurrentWeatherStates.Loaded(res.data)
                 }
@@ -40,15 +39,13 @@ class MainViewModel : ViewModel() {
         }
     }
 
-    private val _Forecast3Hours= MutableStateFlow<Forecast3HoursStates>(Forecast3HoursStates.Empty)
+    private val _Forecast3Hours= MutableStateFlow<Forecast3HoursStates>(Forecast3HoursStates.Loading)
     val forecast3Hours: StateFlow<Forecast3HoursStates> = _Forecast3Hours
 
     fun get3HoursForecast(lat: Double, lon: Double) {
         viewModelScope.launch {
 
-            val res = repository.get3HoursForecast(lat,lon)
-
-            when (res) {
+            when (val res = repository.get3HoursForecast(lat,lon)) {
                 is Results.Success -> {
                     _Forecast3Hours.value = Forecast3HoursStates.Loaded(res.data)
                 }
@@ -64,14 +61,12 @@ class MainViewModel : ViewModel() {
 }
 
 sealed class CurrentWeatherStates {
-    object Empty : CurrentWeatherStates()
     object Loading : CurrentWeatherStates()
     class Loaded (val data: CurrentWeatherModel) : CurrentWeatherStates()
     class Error(val message: String) : CurrentWeatherStates()
 }
 
 sealed class Forecast3HoursStates {
-    object Empty : Forecast3HoursStates()
     object Loading : Forecast3HoursStates()
     class Loaded (val data: ForeCast3HoursModel) : Forecast3HoursStates()
     class Error(val message: String) : Forecast3HoursStates()

@@ -3,14 +3,17 @@ package com.example.currentweather
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -42,16 +45,27 @@ import kotlin.collections.ArrayList
 
 @Composable
 fun Home(viewModel: MainViewModel, navController: NavHostController) {
+
     val height = LocalConfiguration.current.screenHeightDp
     val width = LocalConfiguration.current.screenWidthDp
     var todayDate: String = ""
     var todayDateList: ArrayList<ForeCast3HoursModel.Data> = ArrayList()
+
     Scaffold(
     ) {
 
         when (val state = viewModel.currentWeather.collectAsState().value) {
             is CurrentWeatherStates.Loading -> {
 
+                Box( Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
+                    CircularProgressIndicator()
+                }
+            }
+            is CurrentWeatherStates.Error -> {
+
+                Box( Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
+                    Text(text = state.message)
+                }
             }
             is CurrentWeatherStates.Loaded -> {
 
@@ -81,17 +95,16 @@ fun Home(viewModel: MainViewModel, navController: NavHostController) {
                                 )
                             }
 
-                        Image(
-                            modifier = Modifier
-                                .padding(30.dp)
-                                .shadow(
-                                    10.dp,
-                                    shape = RoundedCornerShape(20.dp),
-                                    clip = true
-                                ),
-                            painter = painterResource(id = R.drawable.maps),
-                            contentDescription = "",
-                        )
+                        Card(elevation = 1.dp, shape = RoundedCornerShape(30.dp), modifier = Modifier
+                            .wrapContentSize()
+                            .padding(30.dp), backgroundColor = Color.Transparent) {
+                            Image(
+                                modifier = Modifier,
+                                painter = painterResource(id = R.drawable.maps),
+                                contentDescription = "",
+                            )
+                        }
+
                     }
                     Column(
                         modifier = Modifier
@@ -258,7 +271,6 @@ fun Home(viewModel: MainViewModel, navController: NavHostController) {
                         ) {
                             Column() {
 
-
                                 Card(
                                     elevation = 0.dp,
                                     shape = RoundedCornerShape(20.dp),
@@ -269,7 +281,7 @@ fun Home(viewModel: MainViewModel, navController: NavHostController) {
                                         painter = painterResource(id = R.drawable.i04d),
                                         contentDescription = "",
                                         modifier = Modifier
-                                            .height((height * 0.1).dp)
+                                            .height((width * 0.18).dp)
                                             .width((width * 0.18).dp)
                                             .background(
                                                 lightblue
@@ -300,7 +312,7 @@ fun Home(viewModel: MainViewModel, navController: NavHostController) {
                                         painter = painterResource(id = R.drawable.wind),
                                         contentDescription = "",
                                         modifier = Modifier
-                                            .height((height * 0.1).dp)
+                                            .height((width * 0.18).dp)
                                             .width((width * 0.18).dp)
                                             .background(
                                                 lightblue
@@ -333,7 +345,7 @@ fun Home(viewModel: MainViewModel, navController: NavHostController) {
                                         painter = painterResource(id = R.drawable.humidity),
                                         contentDescription = "",
                                         modifier = Modifier
-                                            .height((height * 0.1).dp)
+                                            .height((width * 0.18).dp)
                                             .width((width * 0.18).dp)
                                             .background(
                                                 lightblue
@@ -353,46 +365,66 @@ fun Home(viewModel: MainViewModel, navController: NavHostController) {
                                 )
                             }
                         }
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                            Arrangement.SpaceBetween
-                        ) {
-                            Text(
-                                text = "Today",
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 25.sp,
-                                modifier = Modifier.align(Alignment.CenterVertically)
-                            )
-
-                            Text(
-                                text = "Next  5  Days  >",
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 18.sp,
-                                color = skybluedark,
-                                modifier = Modifier.align(Alignment.CenterVertically).clickable {
-                                    navController.navigate(Screen.DailyForecast.route)
-                                },
-                                textAlign = TextAlign.End
-                            )
-                        }
 
                     }
 
                     when (val forcastState =
                         viewModel.forecast3Hours.collectAsState().value) {
-                        is Forecast3HoursStates.Empty -> {}
+                        is Forecast3HoursStates.Loading -> {
+                            Box( Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
+                                CircularProgressIndicator()
+                            }
+                        }
+
+                        is Forecast3HoursStates.Error -> {
+
+                            Box( Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
+                                Text(text = forcastState.message)
+                            }
+                        }
+
                         is Forecast3HoursStates.Loaded -> {
+
                             if (!todayDate.isNotBlank()) {
                                 todayDate = dateCompare(forcastState.data.list!![0]!!.dt_txt!!,"yyyy-MM-dd HH:mm:ss","yyyy-MM-dd")!!
                             }
                             todayDateList = forcastState.data.list!!.filter { data ->
                                 todayDate == dateCompare(data!!.dt_txt!!, "yyyy-MM-dd HH:mm:ss","yyyy-MM-dd")
                             } as ArrayList<ForeCast3HoursModel.Data>
+
+
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth().padding(horizontal = 25.dp, vertical = 10.dp),
+                                Arrangement.SpaceBetween
+                            ) {
+                                Text(
+                                    text = "Today",
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 25.sp,
+                                    modifier = Modifier.align(Alignment.CenterVertically)
+                                )
+
+                                Text(
+                                    text = "Next  5  Days  >",
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 18.sp,
+                                    color = skybluedark,
+                                    modifier = Modifier
+                                        .align(Alignment.CenterVertically)
+                                        .clickable(indication = null, interactionSource = remember {
+                                            MutableInteractionSource()
+                                        }) {
+
+                                            navController.navigate(Screen.DailyForecast.route)
+                                        },
+                                    textAlign = TextAlign.End
+                                )
+                            }
                             LazyRow(
                                 Modifier
                                     .fillMaxWidth()
-                                    .height(160.dp)
+                                    .height(170.dp)
                                     .padding(vertical = 15.dp),
                                 horizontalArrangement = Arrangement.spacedBy(20.dp)
                             ) {
