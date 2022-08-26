@@ -7,19 +7,18 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Card
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
@@ -28,10 +27,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.BaselineShift
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.currentweather.model.ForeCast3HoursModel
+import com.example.currentweather.screen.Screen
 import com.example.currentweather.ui.theme.*
 import com.example.currentweather.utils.convertDate
 import com.example.currentweather.utils.dateCompare
@@ -39,9 +40,7 @@ import com.example.currentweather.utils.getmDate
 import com.example.currentweather.viewModel.CurrentWeatherStates
 import com.example.currentweather.viewModel.Forecast3HoursStates
 import com.example.currentweather.viewModel.MainViewModel
-import com.example.currentweather.screen.Screen
 import java.util.*
-import kotlin.collections.ArrayList
 
 @Composable
 fun Home(viewModel: MainViewModel, navController: NavHostController) {
@@ -57,13 +56,13 @@ fun Home(viewModel: MainViewModel, navController: NavHostController) {
         when (val state = viewModel.currentWeather.collectAsState().value) {
             is CurrentWeatherStates.Loading -> {
 
-                Box( Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
                 }
             }
             is CurrentWeatherStates.Error -> {
 
-                Box( Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text(text = state.message)
                 }
             }
@@ -83,7 +82,7 @@ fun Home(viewModel: MainViewModel, navController: NavHostController) {
                             Column() {
                                 Text(
                                     text = state.data.name!!,
-                                    fontSize = 35.sp,
+                                    fontSize = 25.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = Color.Black
                                 )
@@ -95,15 +94,56 @@ fun Home(viewModel: MainViewModel, navController: NavHostController) {
                                 )
                             }
 
-                        Card(elevation = 1.dp, shape = RoundedCornerShape(30.dp), modifier = Modifier
-                            .wrapContentSize()
-                            .padding(30.dp), backgroundColor = Color.Transparent) {
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Surface(
+                            color = Color.Transparent,
+                            shape = RoundedCornerShape(20.dp),
+                            modifier = Modifier.width(140.dp).height(140.dp)
+                        )  {
                             Image(
-                                modifier = Modifier,
-                                painter = painterResource(id = R.drawable.maps),
+                                painter = painterResource(id = R.drawable.map_pin),
                                 contentDescription = "",
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier.width(130.dp).height(130.dp)
+                                    .alpha(alpha = 0.25f)
+                                    .offset(x = 1.dp, y = 2.dp)
+                            )
+                            Image(
+                                painter = painterResource(id = R.drawable.map_pin),
+                                contentDescription = "",
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier.width(110.dp).height(110.dp)
                             )
                         }
+//                        BottomShadow(alpha = 0.1f, height = 8.dp)
+
+//                        Surface(
+//                            color = Color.Transparent,
+//                            elevation = 10.dp,
+//                            shape = RoundedCornerShape(20.dp),
+//                            modifier = Modifier.width(120.dp).height(120.dp)
+//                        ) {
+//                            Column {
+//                                Image(
+//                                    painter = painterResource(id = R.drawable.map_pin),
+//                                    contentDescription = "",
+//                                    contentScale = ContentScale.Crop,
+//                                    modifier = Modifier.fillMaxSize()
+//                                )
+//                                BottomShadow(alpha = 0.1f, height = 8.dp)
+//                            }
+//                        }
+
+
+//                        Card(elevation = 1.dp, shape = RoundedCornerShape(30.dp), modifier = Modifier
+//                            .wrapContentSize()
+//                            .padding(30.dp)
+//                            .shadow(elevation = 10.dp, clip = true),backgroundColor = Color.Transparent) {
+//                            Image(
+//                                painter = painterResource(id = R.drawable.map_pin),
+//                                contentDescription = "",
+//                            )
+//                        }
 
                     }
                     Column(
@@ -371,14 +411,14 @@ fun Home(viewModel: MainViewModel, navController: NavHostController) {
                     when (val forcastState =
                         viewModel.forecast3Hours.collectAsState().value) {
                         is Forecast3HoursStates.Loading -> {
-                            Box( Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
+                            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                                 CircularProgressIndicator()
                             }
                         }
 
                         is Forecast3HoursStates.Error -> {
 
-                            Box( Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
+                            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                                 Text(text = forcastState.message)
                             }
                         }
@@ -386,16 +426,25 @@ fun Home(viewModel: MainViewModel, navController: NavHostController) {
                         is Forecast3HoursStates.Loaded -> {
 
                             if (!todayDate.isNotBlank()) {
-                                todayDate = dateCompare(forcastState.data.list!![0]!!.dt_txt!!,"yyyy-MM-dd HH:mm:ss","yyyy-MM-dd")!!
+                                todayDate = dateCompare(
+                                    forcastState.data.list!![0]!!.dt_txt!!,
+                                    "yyyy-MM-dd HH:mm:ss",
+                                    "yyyy-MM-dd"
+                                )!!
                             }
                             todayDateList = forcastState.data.list!!.filter { data ->
-                                todayDate == dateCompare(data!!.dt_txt!!, "yyyy-MM-dd HH:mm:ss","yyyy-MM-dd")
+                                todayDate == dateCompare(
+                                    data!!.dt_txt!!,
+                                    "yyyy-MM-dd HH:mm:ss",
+                                    "yyyy-MM-dd"
+                                )
                             } as ArrayList<ForeCast3HoursModel.Data>
 
 
                             Row(
                                 modifier = Modifier
-                                    .fillMaxWidth().padding(horizontal = 25.dp, vertical = 10.dp),
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 25.dp, vertical = 10.dp),
                                 Arrangement.SpaceBetween
                             ) {
                                 Text(
@@ -562,4 +611,104 @@ fun Home(viewModel: MainViewModel, navController: NavHostController) {
             }
         }
     }
+}
+
+@Composable
+fun MyButton() {
+    Box(
+        modifier = Modifier
+
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        Color.Gray,
+                        Color.Transparent
+                    )
+                )
+            )
+            .padding(bottom = 20.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Surface(
+            shape = RoundedCornerShape(20.dp),
+            modifier = Modifier
+
+                .background(Color.Transparent)
+                .clickable { }
+        ) {
+            Box(
+                modifier = Modifier
+                    .padding()
+                    .background(Color.White),
+                contentAlignment = Alignment.Center
+            ) {
+//                Icon(
+//                    modifier = Modifier.size(35.dp),
+//                    imageVector = Icons.Filled.Refresh,
+//                    contentDescription = "",
+//                    tint =  Color.Red
+//                )
+                Image(
+                    painter = painterResource(id = R.drawable.map_pin),
+                    contentDescription = "",
+                )
+            }
+        }
+
+    }
+}
+
+@Composable
+fun BottomShadow(alpha: Float = 0.1f, height: Dp = 8.dp) {
+//    Box(
+//        modifier = Modifier
+//            .fillMaxWidth()
+//            .height(height)
+//            .background(
+//                brush = Brush.verticalGradient(
+//                    colors = listOf(
+//                        Color.Green.copy(alpha = alpha),
+//                        Color.Transparent,
+//                    )
+//                )
+//            )
+//    )
+//    Box(
+//        modifier = Modifier
+//            .width(240.dp)
+//            .height(180.dp)
+//            .outerShadow(
+//                color = Color(0xff000000),
+//                alpha = 0.5f,
+//                cornersRadius = 20.dp,
+//                shadowBlurRadius = 30.dp,
+//                offsetX = 0.dp,
+//                offsetY = 15.dp
+//            )
+//            .clip(RoundedCornerShape(20.dp))
+//            .background(Color(0xFF282A2F))
+//            .innerShadow(
+//                blur = 1.dp,
+//                color = Color(0xff00FFFF),
+//                cornersRadius = 20.dp,
+//                offsetX = (-40.5).dp,
+//                offsetY = (-10.5).dp
+//            )
+//            .innerShadow(
+//                blur = 20.dp,
+//                color = Color(0xffff0000),
+//                cornersRadius = 20.dp,
+//                offsetX = 0.5.dp,
+//                offsetY = 0.5.dp
+//            )
+//            .padding(14.dp),
+//        contentAlignment = Alignment.Center
+//    ) {
+//        Image(
+//            painter = painterResource(id = R.drawable.map_pin),
+//            contentDescription = "",
+//            contentScale = ContentScale.Crop,
+//            modifier = Modifier.fillMaxSize()
+//        )
+//    }
 }
