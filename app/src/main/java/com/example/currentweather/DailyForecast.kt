@@ -75,7 +75,7 @@ fun DailyForecast(viewModel: MainViewModel, navController: NavHostController) {
                                 )
                             )
                         )
-                        .padding(top = 40.dp)
+                        .padding(top = 10.dp)
                 ) {
                     Row(
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -85,8 +85,9 @@ fun DailyForecast(viewModel: MainViewModel, navController: NavHostController) {
                             .height(60.dp)
                             .padding(horizontal = 20.dp)
                     ) {
+
                         Card(
-                            shape = RoundedCornerShape(10.dp), modifier = Modifier
+                            shape = RoundedCornerShape(12.dp), modifier = Modifier
                                 .height(40.dp)
                                 .width(40.dp)
                                 .clickable(indication = null, interactionSource = remember {
@@ -104,16 +105,16 @@ fun DailyForecast(viewModel: MainViewModel, navController: NavHostController) {
                         }
                         Text(
                             text = "Next 5 Days",
-                            fontSize = 22.sp,
+                            fontSize = 20.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.White
                         )
-                        Spacer(modifier = Modifier)
+                        Spacer(modifier = Modifier.width(40.dp))
                     }
                     LazyRow1(
                         Modifier
                             .fillMaxWidth()
-                            .height(160.dp)
+                            .height(140.dp)
                             .padding(vertical = 15.dp),
                         horizontalArrangement = Arrangement.spacedBy(20.dp)
                     ) {
@@ -124,7 +125,7 @@ fun DailyForecast(viewModel: MainViewModel, navController: NavHostController) {
                         items(dailyForecast.size) {
                             Card(
                                 shape = RoundedCornerShape(50.dp),
-                                elevation = 5.dp,
+                                elevation = 0.dp,
                                 modifier = Modifier
                                     .fillMaxHeight()
                             ) {
@@ -234,8 +235,8 @@ fun DailyForecast(viewModel: MainViewModel, navController: NavHostController) {
                                             color = if (dailyForecast.elementAt(it) == currentDate) {
                                                 Purple200
                                             } else Color.White,
-                                            fontSize = 23.sp,
-                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 25.sp,
+                                            fontWeight = FontWeight.W800,
                                             textAlign = TextAlign.Center
                                         )
                                         Text(
@@ -248,7 +249,7 @@ fun DailyForecast(viewModel: MainViewModel, navController: NavHostController) {
                                                 Purple200
                                             } else Color.White,
                                             fontSize = 15.sp,
-                                            fontWeight = FontWeight.SemiBold,
+                                            fontWeight = FontWeight.Bold,
                                             textAlign = TextAlign.Center
                                         )
                                     }
@@ -263,7 +264,7 @@ fun DailyForecast(viewModel: MainViewModel, navController: NavHostController) {
                 }
 
                 Card(
-                    shape = RoundedCornerShape(35.dp),
+                    shape = RoundedCornerShape(topEnd = 25.dp, topStart = 25.dp),
                     modifier = Modifier.background(skybluedark)
                 ) {
                     LazyColumn(
@@ -310,7 +311,7 @@ fun DailyForecast(viewModel: MainViewModel, navController: NavHostController) {
                                         ) {
                                             Card(
                                                 elevation = 0.dp,
-                                                shape = RoundedCornerShape(20.dp),
+                                                shape = RoundedCornerShape(35.dp),
                                                 modifier = Modifier
                                                     .fillMaxWidth()
                                                     .height((height * 0.20).dp),
@@ -392,16 +393,16 @@ fun DailyForecast(viewModel: MainViewModel, navController: NavHostController) {
 
                                                 Card(
                                                     elevation = 0.dp,
-                                                    shape = RoundedCornerShape(20.dp),
+                                                    shape = RoundedCornerShape(25.dp),
                                                     modifier = Modifier
                                                         .padding(top = 35.dp),
-                                                    backgroundColor = Color.White.copy(alpha = 0.3f)
+                                                    backgroundColor = Color.White.copy(alpha = 0.1f)
                                                 ) {
                                                     Image(
                                                         painter = painterResource(id = R.drawable.i04d),
                                                         contentDescription = "",
                                                         modifier = Modifier
-                                                            .height((height * 0.1).dp)
+                                                            .height((width * 0.18).dp)
                                                             .width((width * 0.18).dp)
                                                             .padding(15.dp),
                                                         alignment = Alignment.TopCenter
@@ -421,16 +422,16 @@ fun DailyForecast(viewModel: MainViewModel, navController: NavHostController) {
 
                                                 Card(
                                                     elevation = 0.dp,
-                                                    shape = RoundedCornerShape(20.dp),
+                                                    shape = RoundedCornerShape(25.dp),
                                                     modifier = Modifier
                                                         .padding(top = 35.dp),
-                                                    backgroundColor = Color.White.copy(alpha = 0.3f)
+                                                    backgroundColor = Color.White.copy(alpha = 0.1f)
                                                 ) {
                                                     Image(
                                                         painter = painterResource(id = R.drawable.wind),
                                                         contentDescription = "",
                                                         modifier = Modifier
-                                                            .height((height * 0.1).dp)
+                                                            .height((width * 0.18).dp)
                                                             .width((width * 0.18).dp)
                                                             .padding(15.dp),
                                                         alignment = Alignment.TopCenter,
@@ -452,16 +453,16 @@ fun DailyForecast(viewModel: MainViewModel, navController: NavHostController) {
 
                                                 Card(
                                                     elevation = 0.dp,
-                                                    shape = RoundedCornerShape(20.dp),
+                                                    shape = RoundedCornerShape(25.dp),
                                                     modifier = Modifier
                                                         .padding(top = 35.dp),
-                                                    backgroundColor = Color.White.copy(alpha = 0.3f)
+                                                    backgroundColor = Color.White.copy(alpha = 0.1f)
                                                 ) {
                                                     Image(
                                                         painter = painterResource(id = R.drawable.humidity),
                                                         contentDescription = "",
                                                         modifier = Modifier
-                                                            .height((height * 0.1).dp)
+                                                            .height((width * 0.18).dp)
                                                             .width((width * 0.18).dp)
                                                             .padding(10.dp),
                                                         alignment = Alignment.TopCenter

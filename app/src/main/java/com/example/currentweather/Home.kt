@@ -1,25 +1,23 @@
 package com.example.currentweather
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Card
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBackIosNew
+import androidx.compose.material.icons.filled.ArrowForwardIos
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.*
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
@@ -51,25 +49,29 @@ fun Home(viewModel: MainViewModel, navController: NavHostController) {
     var todayDate: String = ""
     var todayDateList: ArrayList<ForeCast3HoursModel.Data> = ArrayList()
 
-    Scaffold(
+    Scaffold(backgroundColor = backgroundAllTheme
     ) {
 
         when (val state = viewModel.currentWeather.collectAsState().value) {
             is CurrentWeatherStates.Loading -> {
 
-                Box( Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
                 }
             }
             is CurrentWeatherStates.Error -> {
 
-                Box( Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text(text = state.message)
                 }
             }
             is CurrentWeatherStates.Loaded -> {
 
-                Column(Modifier.padding(top = 15.dp)) {
+                Column(
+                    Modifier
+                        .verticalScroll(rememberScrollState())
+                        .padding(top = 15.dp)
+                ) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -78,26 +80,32 @@ fun Home(viewModel: MainViewModel, navController: NavHostController) {
                         Arrangement.SpaceBetween,
                         Alignment.CenterVertically
                     ) {
-                        val time =
 
-                            Column() {
-                                Text(
-                                    text = state.data.name!!,
-                                    fontSize = 35.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color.Black
-                                )
-                                Text(
-                                    text = getmDate(state.data.dt!!.toLong())!!,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color.Gray,
-                                    fontSize = 15.sp
-                                )
-                            }
+                        Column(Modifier.weight(6f)) {
+                            Text(
+                                text = state.data.name!!,
+                                fontSize = 23.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.Black
+                            )
+                            Text(
+                                modifier = Modifier,
+                                text = getmDate(state.data.dt!!.toLong())!!,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.Black.copy(alpha = 0.2f),
+                                fontSize = 13.sp
+                            )
+                        }
 
-                        Card(elevation = 1.dp, shape = RoundedCornerShape(30.dp), modifier = Modifier
-                            .wrapContentSize()
-                            .padding(30.dp), backgroundColor = Color.Transparent) {
+                        Card(
+                            elevation = 0.dp,
+                            shape = RoundedCornerShape(30.dp),
+                            modifier = Modifier
+                                .wrapContentSize()
+                                .weight(4f)
+                                .padding(10.dp),
+                            backgroundColor = Color.Transparent
+                        ) {
                             Image(
                                 modifier = Modifier,
                                 painter = painterResource(id = R.drawable.maps),
@@ -117,11 +125,11 @@ fun Home(viewModel: MainViewModel, navController: NavHostController) {
                         ) {
                             Card(
                                 elevation = 20.dp,
-                                shape = RoundedCornerShape(20.dp),
+                                shape = RoundedCornerShape(30.dp),
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(top = 35.dp)
-                                    .height((height * 0.20).dp)
+                                    .height((height * 0.25).dp)
                             ) {
                                 Row(
                                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -135,8 +143,8 @@ fun Home(viewModel: MainViewModel, navController: NavHostController) {
                                             )
                                         )
                                         .padding(
-                                            top = 10.dp,
-                                            bottom = 15.dp,
+                                            top = 0.dp,
+                                            bottom = 30.dp,
                                             start = 20.dp,
                                             end = 20.dp
                                         )
@@ -148,48 +156,40 @@ fun Home(viewModel: MainViewModel, navController: NavHostController) {
                                         ),
                                         color = Color.White,
                                         fontSize = 20.sp,
-                                        fontWeight = FontWeight.Bold,
+                                        fontWeight = FontWeight.W800,
                                         modifier = Modifier.align(Alignment.Bottom)
                                     )
                                     Column() {
                                         Text(
-                                            text = buildAnnotatedString {
-                                                append(
-                                                    "${((state.data.main!!.temp!! - 273.15)).toInt()}"
-                                                )
-                                                withStyle(
-                                                    SpanStyle(
-                                                        baselineShift = BaselineShift.Superscript,
-                                                        color = Color.White,
-                                                        fontSize = 30.sp
+                                            text = "${((state.data.main!!.temp!! - 273.15)).toInt()}°",
+                                            modifier = Modifier
+                                                .graphicsLayer(alpha = 0.99f)
+                                                .drawWithCache {
+                                                    val brush = Brush.verticalGradient(
+                                                        listOf(
+                                                            Color.White,
+                                                            skyblue
+                                                        )
                                                     )
-                                                ) {
-                                                    append("o")
-                                                }
-                                            },
-                                            color = Color.White,
-                                            fontSize = 60.sp,
-                                            fontWeight = FontWeight.W800,
-                                            textAlign = TextAlign.End
+                                                    onDrawWithContent {
+                                                        drawContent()
+                                                        drawRect(
+                                                            brush,
+                                                            blendMode = BlendMode.SrcAtop
+                                                        )
+                                                    }
+                                                },
+                                            fontSize = 70.sp,
+                                            fontWeight = FontWeight.W700,
+                                            lineHeight = 60.sp,
                                         )
                                         Text(
-                                            text = buildAnnotatedString {
-                                                append(
-                                                    "Feels LIke ${((state.data.main!!.feels_like!! - 273.15)).toInt()}"
-                                                )
-                                                withStyle(
-                                                    SpanStyle(
-                                                        baselineShift = BaselineShift.Superscript,
-                                                        color = Color.White,
-                                                        fontSize = 10.sp
-                                                    )
-                                                ) {
-                                                    append("o")
-                                                }
-                                            }, color = Color.White,
+                                            modifier = Modifier,
+                                            text = "Feels like ${((state.data.main!!.feels_like!! - 273.15)).toInt()}°",
+                                            color = Color.White,
                                             fontSize = 15.sp,
                                             fontWeight = FontWeight.Bold,
-                                            textAlign = TextAlign.End
+                                            textAlign = TextAlign.End,
                                         )
                                     }
                                 }
@@ -284,7 +284,7 @@ fun Home(viewModel: MainViewModel, navController: NavHostController) {
                                             .height((width * 0.18).dp)
                                             .width((width * 0.18).dp)
                                             .background(
-                                                lightblue
+                                                Color.Blue.copy(alpha = 0.05f)
                                             )
                                             .padding(15.dp),
                                         alignment = Alignment.TopCenter
@@ -315,7 +315,7 @@ fun Home(viewModel: MainViewModel, navController: NavHostController) {
                                             .height((width * 0.18).dp)
                                             .width((width * 0.18).dp)
                                             .background(
-                                                lightblue
+                                                Color.Blue.copy(alpha = 0.05f)
                                             )
                                             .padding(15.dp),
                                         alignment = Alignment.TopCenter,
@@ -348,7 +348,7 @@ fun Home(viewModel: MainViewModel, navController: NavHostController) {
                                             .height((width * 0.18).dp)
                                             .width((width * 0.18).dp)
                                             .background(
-                                                lightblue
+                                                Color.Blue.copy(alpha = 0.05f)
                                             )
                                             .padding(10.dp),
                                         alignment = Alignment.TopCenter
@@ -386,17 +386,35 @@ fun Home(viewModel: MainViewModel, navController: NavHostController) {
                         is Forecast3HoursStates.Loaded -> {
 
                             if (!todayDate.isNotBlank()) {
-                                todayDate = dateCompare(forcastState.data.list!![0]!!.dt_txt!!,"yyyy-MM-dd HH:mm:ss","yyyy-MM-dd")!!
+                                todayDate = dateCompare(
+                                    forcastState.data.list!![0]!!.dt_txt!!,
+                                    "yyyy-MM-dd HH:mm:ss",
+                                    "yyyy-MM-dd"
+                                )!!
                             }
                             todayDateList = forcastState.data.list!!.filter { data ->
-                                todayDate == dateCompare(data!!.dt_txt!!, "yyyy-MM-dd HH:mm:ss","yyyy-MM-dd")
+                                todayDate == dateCompare(
+                                    data!!.dt_txt!!,
+                                    "yyyy-MM-dd HH:mm:ss",
+                                    "yyyy-MM-dd"
+                                )
                             } as ArrayList<ForeCast3HoursModel.Data>
 
 
                             Row(
                                 modifier = Modifier
-                                    .fillMaxWidth().padding(horizontal = 25.dp, vertical = 10.dp),
-                                Arrangement.SpaceBetween
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 25.dp, vertical = 10.dp)
+                                    .height(40.dp)
+                                    .clickable(
+                                        indication = null,
+                                        interactionSource = remember {
+                                            MutableInteractionSource()
+                                        }) {
+
+                                        navController.navigate(Screen.DailyForecast.route)
+                                    },
+                                horizontalArrangement = Arrangement.SpaceBetween
                             ) {
                                 Text(
                                     text = "Today",
@@ -405,27 +423,46 @@ fun Home(viewModel: MainViewModel, navController: NavHostController) {
                                     modifier = Modifier.align(Alignment.CenterVertically)
                                 )
 
-                                Text(
-                                    text = "Next  5  Days  >",
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 18.sp,
-                                    color = skybluedark,
-                                    modifier = Modifier
-                                        .align(Alignment.CenterVertically)
-                                        .clickable(indication = null, interactionSource = remember {
-                                            MutableInteractionSource()
-                                        }) {
-
-                                            navController.navigate(Screen.DailyForecast.route)
-                                        },
-                                    textAlign = TextAlign.End
-                                )
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.fillMaxHeight()
+                                ) {
+                                    Text(
+                                        text = "Next  5  Days",
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 15.sp,
+                                        color = skybluedark,
+                                        modifier = Modifier
+                                            .align(Alignment.CenterVertically),
+                                        textAlign = TextAlign.End
+                                    )
+                                    Spacer(modifier = Modifier.padding(horizontal = 3.dp))
+                                    Icon(
+                                        Icons.Default.ArrowForwardIos,
+                                        contentDescription = "",
+                                        tint = skybluedark,
+                                        modifier = Modifier
+                                            .height(18.dp)
+                                            .width(18.dp)
+                                            .align(Alignment.CenterVertically)
+                                    )
+                                }
                             }
                             LazyRow(
                                 Modifier
                                     .fillMaxWidth()
-                                    .height(170.dp)
-                                    .padding(vertical = 15.dp),
+                                    .background(
+                                        brush = Brush.verticalGradient(
+                                            colors = listOf(
+                                                backgroundAllTheme,
+                                                backgroundBlue,
+                                                backgroundAllTheme,
+                                            )
+                                        )
+                                    )
+                                    .height(130.dp)
+                                    .padding(vertical = 15.dp)
+                                    ,
                                 horizontalArrangement = Arrangement.spacedBy(20.dp)
                             ) {
                                 item {
@@ -435,9 +472,10 @@ fun Home(viewModel: MainViewModel, navController: NavHostController) {
                                 items(todayDateList.size) {
                                     Card(
                                         shape = RoundedCornerShape(50.dp),
-                                        elevation = 5.dp,
+                                        elevation = 0.dp,
                                         modifier = Modifier
                                             .fillMaxHeight(),
+                                        border = BorderStroke(0.dp, Color.Transparent)
                                     ) {
                                         Column(
                                             verticalArrangement = Arrangement.SpaceEvenly,
@@ -446,18 +484,18 @@ fun Home(viewModel: MainViewModel, navController: NavHostController) {
                                                 .background(
                                                     brush = Brush.verticalGradient(
                                                         colors = listOf(
-                                                            lightPurple,
-                                                            darkPurple
+                                                            Color.White,
+                                                            Color.White
                                                         )
                                                     )
                                                 )
-                                                .width(70.dp)
-                                                .padding(10.dp)
+                                                .width(55.dp)
+                                                .padding(8.dp)
                                         ) {
                                             Text(
                                                 text = convertDate(todayDateList[it].dt_txt!!)!!,
-                                                color = Color.White,
-                                                fontSize = 14.sp,
+                                                color = Color.Gray.copy(alpha = 0.4f),
+                                                fontSize = 13.sp,
                                                 fontWeight = FontWeight.Bold,
                                                 textAlign = TextAlign.End
                                             )
@@ -525,26 +563,14 @@ fun Home(viewModel: MainViewModel, navController: NavHostController) {
                                                 ),
                                                 contentDescription = "",
                                                 modifier = Modifier
-                                                    .height((height * 0.05).dp)
+                                                    .height((height * 0.04).dp)
                                                     .width((width * 0.08).dp),
                                                 alignment = Alignment.TopCenter
                                             )
                                             Text(
-                                                text = buildAnnotatedString {
-                                                    append(
-                                                        "${((todayDateList[it].main!!.temp!! - 273.15)).toInt()}"
-                                                    )
-                                                    withStyle(
-                                                        SpanStyle(
-                                                            baselineShift = BaselineShift.Superscript,
-                                                            color = Color.White,
-                                                            fontSize = 12.sp
-                                                        )
-                                                    ) {
-                                                        append("o")
-                                                    }
-                                                }, color = Color.White,
-                                                fontSize = 18.sp,
+                                                text ="${((todayDateList[it].main!!.temp!! - 273.15)).toInt()}°"
+                                                , color = Color.Gray.copy(alpha = 0.4f),
+                                                fontSize = 19.sp,
                                                 fontWeight = FontWeight.Bold,
                                                 textAlign = TextAlign.End
                                             )
