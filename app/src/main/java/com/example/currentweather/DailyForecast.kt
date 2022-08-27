@@ -6,9 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Card
-import androidx.compose.material.Icon
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBackIos
@@ -16,13 +14,15 @@ import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.*
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.BaselineShift
 import androidx.compose.ui.text.style.TextAlign
@@ -32,11 +32,13 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.currentweather.ui.theme.*
 import com.example.currentweather.utils.dateCompare
+import com.example.currentweather.utils.getWeatherImage
 import com.example.currentweather.viewModel.Forecast3HoursStates
 import com.example.currentweather.viewModel.MainViewModel
 import java.util.*
 import androidx.compose.foundation.lazy.LazyRow as LazyRow1
 
+@ExperimentalFoundationApi
 @Composable
 fun DailyForecast(viewModel: MainViewModel, navController: NavHostController) {
 
@@ -55,7 +57,7 @@ fun DailyForecast(viewModel: MainViewModel, navController: NavHostController) {
             }
             var currentDate by remember { mutableStateOf(dailyForecast.first()) }
 
-            var oneDayForcast = forcastState.data.list.filter {
+            val oneDayForcast = forcastState.data.list.filter {
                 dateCompare(
                     it!!.dt_txt!!,
                     "yyyy-MM-dd HH:mm:ss",
@@ -63,30 +65,20 @@ fun DailyForecast(viewModel: MainViewModel, navController: NavHostController) {
                 ) == currentDate
             }
 
-            Column(
-            ) {
-                Column(
-                    Modifier
-                        .background(
-                            brush = Brush.verticalGradient(
-                                colors = listOf(
-                                    skyblue,
-                                    skybluedark
-                                )
-                            )
-                        )
-                        .padding(top = 40.dp)
-                ) {
+            Scaffold(
+                topBar = {
                     Row(
                         horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(60.dp)
-                            .padding(horizontal = 20.dp)
+                            .background(lightblue)
+                            .padding(horizontal = 20.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
+
                         Card(
-                            shape = RoundedCornerShape(10.dp), modifier = Modifier
+                            shape = RoundedCornerShape(12.dp), modifier = Modifier
                                 .height(40.dp)
                                 .width(40.dp)
                                 .clickable(indication = null, interactionSource = remember {
@@ -104,190 +96,167 @@ fun DailyForecast(viewModel: MainViewModel, navController: NavHostController) {
                         }
                         Text(
                             text = "Next 5 Days",
-                            fontSize = 22.sp,
+                            fontSize = 20.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.White
                         )
-                        Spacer(modifier = Modifier)
+                        Spacer(modifier = Modifier.width(40.dp))
                     }
-                    LazyRow1(
-                        Modifier
-                            .fillMaxWidth()
-                            .height(160.dp)
-                            .padding(vertical = 15.dp),
-                        horizontalArrangement = Arrangement.spacedBy(20.dp)
+                }) {
+                Box {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(lightblue)
+                    )
+
+                    Card(
+                        shape = RoundedCornerShape(topEnd = 35.dp, topStart = 35.dp),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(top = (height * 0.35).dp),
+                        backgroundColor = Color.White
                     ) {
-                        item {
-                            Box(modifier = Modifier.width(1.dp)) {
-                            }
-                        }
-                        items(dailyForecast.size) {
-                            Card(
-                                shape = RoundedCornerShape(50.dp),
-                                elevation = 5.dp,
-                                modifier = Modifier
-                                    .fillMaxHeight()
-                            ) {
-                                Column(
-                                    verticalArrangement = Arrangement.SpaceEvenly,
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    modifier = Modifier
-                                        .background(
-                                            brush = if (dailyForecast.elementAt(it) == currentDate) {
-                                                Brush.verticalGradient(
-                                                    colors = listOf(
-                                                        Color.White,
-                                                        Color.White
-                                                    )
-                                                )
-                                            } else
-                                                Brush.verticalGradient(
-                                                    colors = listOf(
-                                                        skyblue,
-                                                        skybluedark
-                                                    )
-                                                )
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(
+                                    brush =
+                                    Brush.horizontalGradient(
+                                        colors = listOf(
+                                            Color.White,
+                                            Color.Black.copy(alpha = 0.06f),
+                                            Color.Black.copy(alpha = 0.06f),
+                                            Color.Black.copy(alpha = 0.06f),
+                                            Color.Black.copy(alpha = 0.06f),
+                                            Color.White
                                         )
-                                        .width(70.dp)
-                                        .padding(10.dp)
-                                        .clickable(indication = null, interactionSource = remember {
-                                            MutableInteractionSource()
-                                        }) {
-                                            currentDate = (dailyForecast.elementAt(it))
-                                        }
-                                ) {
-                                    Image(
-                                        painter = painterResource(
-                                            id = when (forcastState.data.list?.get(it)!!.weather!![0]!!.icon) {
-                                                "01d" -> {
-                                                    R.drawable.i01d
-                                                }
-                                                "01n" -> {
-                                                    R.drawable.i01n
-                                                }
-                                                "02d" -> {
-                                                    R.drawable.i02d
-                                                }
-                                                "02n" -> {
-                                                    R.drawable.i02n
-                                                }
-                                                "03d" -> {
-                                                    R.drawable.i03d
-                                                }
-                                                "03n" -> {
-                                                    R.drawable.i03n
-                                                }
-                                                "04d" -> {
-                                                    R.drawable.i04d
-                                                }
-                                                "04n" -> {
-                                                    R.drawable.i04n
-                                                }
-                                                "09d" -> {
-                                                    R.drawable.i09d
-                                                }
-                                                "09n" -> {
-                                                    R.drawable.i09d
-                                                }
-                                                "10d" -> {
-                                                    R.drawable.i09d
-                                                }
-                                                "10n" -> {
-                                                    R.drawable.i09d
-                                                }
-                                                "11d" -> {
-                                                    R.drawable.i11d
-                                                }
-                                                "11n" -> {
-                                                    R.drawable.i11d
-                                                }
-                                                "13d" -> {
-                                                    R.drawable.i13n
-                                                }
-                                                "13n" -> {
-                                                    R.drawable.i13n
-                                                }
-                                                "50d" -> {
-                                                    R.drawable.i50n
-                                                }
-                                                "50n" -> {
-                                                    R.drawable.i50n
-                                                }
-                                                else -> {
-                                                    R.drawable.i01d
-                                                }
-                                            }
-                                        ),
-                                        contentDescription = "",
-                                        modifier = Modifier
-                                            .height((height * 0.05).dp)
-                                            .width((width * 0.08).dp),
-                                        alignment = Alignment.TopCenter
                                     )
-                                    Column() {
-                                        Text(
-                                            text = dateCompare(
-                                                dailyForecast.elementAt(it),
-                                                "yyyy-MM-dd",
-                                                "dd"
-                                            )!!,
-                                            color = if (dailyForecast.elementAt(it) == currentDate) {
-                                                Purple200
-                                            } else Color.White,
-                                            fontSize = 23.sp,
-                                            fontWeight = FontWeight.Bold,
-                                            textAlign = TextAlign.Center
-                                        )
-                                        Text(
-                                            text = dateCompare(
-                                                dailyForecast.elementAt(it),
-                                                "yyyy-MM-dd",
-                                                "EEE"
-                                            )!!,
-                                            color = if (dailyForecast.elementAt(it) == currentDate) {
-                                                Purple200
-                                            } else Color.White,
-                                            fontSize = 15.sp,
-                                            fontWeight = FontWeight.SemiBold,
-                                            textAlign = TextAlign.Center
-                                        )
+                                )
+                        )
+                    }
+
+                    LazyColumn() {
+
+                        item {
+                            LazyRow1(
+                                Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 15.dp),
+                                horizontalArrangement = Arrangement.spacedBy(20.dp)
+                            ) {
+                                item {
+                                    Box(modifier = Modifier.width(1.dp)) {
+                                    }
+                                }
+                                items(dailyForecast.size) {
+                                    Card(
+                                        shape = RoundedCornerShape(50.dp),
+                                        elevation = 0.dp,
+                                        backgroundColor = Color.Transparent,
+                                    ) {
+                                        Column(
+                                            verticalArrangement = Arrangement.Center,
+                                            horizontalAlignment = Alignment.CenterHorizontally,
+                                            modifier = Modifier
+                                                .background(
+                                                    brush = if (dailyForecast.elementAt(it) == currentDate) {
+                                                        Brush.verticalGradient(
+                                                            colors = listOf(
+                                                                Color.White,
+                                                                Color.White
+                                                            )
+                                                        )
+                                                    } else
+                                                        Brush.verticalGradient(
+                                                            colors = listOf(
+                                                                Color.White.copy(0.2f),
+                                                                lightblue1
+                                                            )
+                                                        )
+                                                )
+                                                .width(68.dp)
+                                                .height(125.dp)
+                                                .padding(10.dp)
+                                                .clickable(
+                                                    indication = null,
+                                                    interactionSource = remember {
+                                                        MutableInteractionSource()
+                                                    }) {
+                                                    currentDate = (dailyForecast.elementAt(it))
+                                                }
+                                        ) {
+                                            Image(
+                                                painter = painterResource(
+                                                    id = getWeatherImage(forcastState.data.list[it]!!.weather!![0]!!.icon!!)
+                                                ),
+                                                contentDescription = "",
+                                                modifier = Modifier
+                                                    .height((height * 0.04).dp)
+                                                    .width((width * 0.08).dp),
+                                                alignment = Alignment.TopCenter
+                                            )
+                                            Column(
+                                                horizontalAlignment = Alignment.CenterHorizontally,
+                                                verticalArrangement = Arrangement.Center
+                                            ) {
+                                                Text(
+                                                    text = dateCompare(
+                                                        dailyForecast.elementAt(it),
+                                                        "yyyy-MM-dd",
+                                                        "dd"
+                                                    )!!,
+                                                    color = if (dailyForecast.elementAt(it) == currentDate) {
+                                                        purpleText
+                                                    } else Color.White,
+                                                    fontSize = 24.sp,
+                                                    fontWeight = FontWeight.Bold,
+                                                    textAlign = TextAlign.Center
+                                                )
+                                                Text(
+                                                    text = dateCompare(
+                                                        dailyForecast.elementAt(it),
+                                                        "yyyy-MM-dd",
+                                                        "EEE"
+                                                    )!!,
+                                                    color = if (dailyForecast.elementAt(it) == currentDate) {
+                                                        purpleText
+                                                    } else Color.White,
+                                                    fontSize = 15.sp,
+                                                    fontWeight = FontWeight.Bold,
+                                                    textAlign = TextAlign.Justify
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                                item {
+                                    Box(modifier = Modifier.width(1.dp)) {
                                     }
                                 }
                             }
                         }
-                        item {
-                            Box(modifier = Modifier.width(1.dp)) {
-                            }
-                        }
-                    }
-                }
 
-                Card(
-                    shape = RoundedCornerShape(35.dp),
-                    modifier = Modifier.background(skybluedark)
-                ) {
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxSize()
-                    ) {
-
-                        item {
+                        stickyHeader {
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .background(
-                                        Color.Transparent
-                                    )
-                                    .padding(top = 20.dp)
+                                    .padding(start = 20.dp, bottom = 20.dp, end = 20.dp)
                             ) {
-                                Card(
-                                    elevation = 20.dp,
-                                    shape = RoundedCornerShape(20.dp),
+
+                                Spacer(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(top = 35.dp)
-                                        .height((height * 0.4).dp)
-                                        .padding(start = 20.dp, end = 20.dp)
+                                        .height(55.dp)
+                                        .background(lightblue)
+                                )
+                                Card(
+                                    elevation = 20.dp,
+                                    shape = RoundedCornerShape(25.dp),
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(top = 35.dp, bottom = 0.dp)
+//                                        .height((height * 0.4).dp)
                                 ) {
                                     Column(
                                         modifier = Modifier
@@ -304,104 +273,90 @@ fun DailyForecast(viewModel: MainViewModel, navController: NavHostController) {
                                         Box(
                                             modifier = Modifier
                                                 .fillMaxWidth()
-                                                .background(
-                                                    Color.Transparent
-                                                )
+                                                .background(Color.Transparent)
                                         ) {
-                                            Card(
-                                                elevation = 0.dp,
-                                                shape = RoundedCornerShape(20.dp),
+                                            Row(
+                                                horizontalArrangement = Arrangement.SpaceBetween,
                                                 modifier = Modifier
-                                                    .fillMaxWidth()
-                                                    .height((height * 0.20).dp),
-                                                backgroundColor = Color.Transparent
+                                                    .padding(
+                                                        top = 0.dp,
+                                                        bottom = 20.dp,
+                                                        start = 30.dp,
+                                                        end = 10.dp
+                                                    )
+                                                    .height((height * 0.22).dp),
                                             ) {
-                                                Row(
-                                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                                Text(
+                                                    oneDayForcast.first()?.weather?.first()!!.description!!.substring(0, 1).toUpperCase(Locale.ROOT)
+                                                            + oneDayForcast.first()?.weather?.first()!!.description!!.substring(1).toLowerCase(Locale.ROOT),
+                                                    color = Color.White,
+                                                    fontSize = 24.sp,
+                                                    fontWeight = FontWeight.W800,
+                                                    fontFamily = FontFamily.Serif,
                                                     modifier = Modifier
-                                                        .padding(
-                                                            top = 10.dp,
-                                                            bottom = 15.dp,
-                                                            start = 20.dp,
-                                                            end = 20.dp
-                                                        )
-                                                        .background(
-                                                            Color.Transparent
-                                                        )
-                                                        .fillMaxSize(),
+                                                        .align(Alignment.Bottom)
+                                                        .weight(6f)
+                                                )
+                                                Column(
+                                                    Modifier.weight(5f),
+                                                    horizontalAlignment = Alignment.CenterHorizontally
                                                 ) {
                                                     Text(
-                                                        oneDayForcast.first()?.weather?.first()!!.description!!.uppercase(
-                                                            Locale.getDefault()
-                                                        ),
-                                                        color = Color.White,
-                                                        fontSize = 20.sp,
-                                                        fontWeight = FontWeight.Bold,
-                                                        modifier = Modifier.align(Alignment.Bottom)
-                                                    )
-                                                    Column() {
-                                                        Text(
-                                                            text = buildAnnotatedString {
-                                                                append(
-                                                                    "${((oneDayForcast.first()?.main?.temp!! - 273.15)).toInt()}"
-                                                                )
-                                                                withStyle(
-                                                                    SpanStyle(
-                                                                        baselineShift = BaselineShift.Superscript,
-                                                                        color = Color.White,
-                                                                        fontSize = 30.sp
+                                                        text = "${((oneDayForcast.first()?.main?.temp!! - 273.15)).toInt()}°",
+                                                        modifier = Modifier
+                                                            .graphicsLayer(alpha = 0.99f)
+                                                            .drawWithCache {
+                                                                val brush = Brush.verticalGradient(
+                                                                    listOf(
+                                                                        Color.White,
+                                                                        skyblue
                                                                     )
-                                                                ) {
-                                                                    append("o")
+                                                                )
+                                                                onDrawWithContent {
+                                                                    drawContent()
+                                                                    drawRect(
+                                                                        brush,
+                                                                        blendMode = BlendMode.SrcAtop
+                                                                    )
                                                                 }
                                                             },
-                                                            color = Color.White,
-                                                            fontSize = 60.sp,
-                                                            fontWeight = FontWeight.W800,
-                                                            textAlign = TextAlign.End
-                                                        )
-                                                        Text(
-                                                            text = buildAnnotatedString {
-                                                                append(
-                                                                    "Feels LIke ${((oneDayForcast.first()?.main?.feels_like!! - 273.15)).toInt()}"
-                                                                )
-                                                                withStyle(
-                                                                    SpanStyle(
-                                                                        baselineShift = BaselineShift.Superscript,
-                                                                        color = Color.White,
-                                                                        fontSize = 10.sp
-                                                                    )
-                                                                ) {
-                                                                    append("o")
-                                                                }
-                                                            }, color = Color.White,
-                                                            fontSize = 15.sp,
-                                                            fontWeight = FontWeight.Bold,
-                                                            textAlign = TextAlign.End
-                                                        )
-                                                    }
+                                                        fontSize = 70.sp,
+                                                        fontWeight = FontWeight.W700,
+                                                        lineHeight = 60.sp,
+                                                    )
+                                                    Text(
+                                                        modifier = Modifier,
+                                                        text = "Feels like ${((oneDayForcast.first()?.main?.feels_like!! - 273.15)).toInt()}°",
+                                                        color = Color.White,
+                                                        fontSize = 15.sp,
+                                                        fontWeight = FontWeight.Bold,
+                                                        textAlign = TextAlign.End,
+                                                    )
                                                 }
                                             }
                                         }
                                         Row(
-                                            horizontalArrangement = Arrangement.SpaceEvenly,
+                                            horizontalArrangement = Arrangement.SpaceAround,
                                             modifier = Modifier
+                                                .padding(bottom = 10.dp, start = 20.dp, end = 20.dp)
                                                 .fillMaxWidth()
                                         ) {
-                                            Column() {
-
+                                            Column(
+                                                Modifier.weight(1f),
+                                                horizontalAlignment = Alignment.CenterHorizontally
+                                            ) {
                                                 Card(
                                                     elevation = 0.dp,
-                                                    shape = RoundedCornerShape(20.dp),
+                                                    shape = RoundedCornerShape(25.dp),
                                                     modifier = Modifier
-                                                        .padding(top = 35.dp),
-                                                    backgroundColor = Color.White.copy(alpha = 0.3f)
+                                                        .padding(top = 0.dp),
+                                                    backgroundColor = Color.White.copy(alpha = 0.1f),
                                                 ) {
                                                     Image(
                                                         painter = painterResource(id = R.drawable.i04d),
                                                         contentDescription = "",
                                                         modifier = Modifier
-                                                            .height((height * 0.1).dp)
+                                                            .height((width * 0.18).dp)
                                                             .width((width * 0.18).dp)
                                                             .padding(15.dp),
                                                         alignment = Alignment.TopCenter
@@ -409,7 +364,7 @@ fun DailyForecast(viewModel: MainViewModel, navController: NavHostController) {
                                                 }
                                                 Text(
                                                     modifier = Modifier
-                                                        .width((width * 0.18).dp)
+                                                        .fillMaxWidth()
                                                         .padding(vertical = 10.dp),
                                                     text = oneDayForcast[0]?.clouds?.all.toString() + "%",
                                                     fontWeight = FontWeight.Bold,
@@ -417,20 +372,22 @@ fun DailyForecast(viewModel: MainViewModel, navController: NavHostController) {
                                                     color = Color.White
                                                 )
                                             }
-                                            Column() {
-
+                                            Column(
+                                                Modifier.weight(1f),
+                                                horizontalAlignment = Alignment.CenterHorizontally
+                                            ) {
                                                 Card(
                                                     elevation = 0.dp,
-                                                    shape = RoundedCornerShape(20.dp),
+                                                    shape = RoundedCornerShape(25.dp),
                                                     modifier = Modifier
-                                                        .padding(top = 35.dp),
-                                                    backgroundColor = Color.White.copy(alpha = 0.3f)
+                                                        .padding(top = 0.dp),
+                                                    backgroundColor = Color.White.copy(alpha = 0.1f)
                                                 ) {
                                                     Image(
                                                         painter = painterResource(id = R.drawable.wind),
                                                         contentDescription = "",
                                                         modifier = Modifier
-                                                            .height((height * 0.1).dp)
+                                                            .height((width * 0.18).dp)
                                                             .width((width * 0.18).dp)
                                                             .padding(15.dp),
                                                         alignment = Alignment.TopCenter,
@@ -439,7 +396,7 @@ fun DailyForecast(viewModel: MainViewModel, navController: NavHostController) {
                                                 }
                                                 Text(
                                                     modifier = Modifier
-                                                        .width((width * 0.18).dp)
+                                                        .fillMaxWidth()
                                                         .padding(vertical = 10.dp),
                                                     text = (oneDayForcast[0]?.wind?.speed!! * 3600 / 1000).toInt()
                                                         .toString() + " km/h",
@@ -448,29 +405,30 @@ fun DailyForecast(viewModel: MainViewModel, navController: NavHostController) {
                                                     color = Color.White
                                                 )
                                             }
-                                            Column() {
-
+                                            Column(
+                                                Modifier.weight(1f),
+                                                horizontalAlignment = Alignment.CenterHorizontally
+                                            ) {
                                                 Card(
                                                     elevation = 0.dp,
-                                                    shape = RoundedCornerShape(20.dp),
+                                                    shape = RoundedCornerShape(25.dp),
                                                     modifier = Modifier
-                                                        .padding(top = 35.dp),
-                                                    backgroundColor = Color.White.copy(alpha = 0.3f)
+                                                        .padding(top = 0.dp),
+                                                    backgroundColor = Color.White.copy(alpha = 0.1f)
                                                 ) {
                                                     Image(
                                                         painter = painterResource(id = R.drawable.humidity),
                                                         contentDescription = "",
                                                         modifier = Modifier
-                                                            .height((height * 0.1).dp)
+                                                            .height((width * 0.18).dp)
                                                             .width((width * 0.18).dp)
                                                             .padding(10.dp),
                                                         alignment = Alignment.TopCenter
                                                     )
                                                 }
-
                                                 Text(
                                                     modifier = Modifier
-                                                        .width((width * 0.18).dp)
+                                                        .fillMaxWidth()
                                                         .padding(vertical = 10.dp),
                                                     text = oneDayForcast[0]?.main?.humidity.toString() + "%",
                                                     fontWeight = FontWeight.Bold,
@@ -483,211 +441,98 @@ fun DailyForecast(viewModel: MainViewModel, navController: NavHostController) {
                                 }
                                 Image(
                                     painter = painterResource(
-                                        id = when (oneDayForcast[0]?.weather?.first()?.icon) {
-                                            "01d" -> {
-                                                R.drawable.i01d
-                                            }
-                                            "01n" -> {
-                                                R.drawable.i01n
-                                            }
-                                            "02d" -> {
-                                                R.drawable.i02d
-                                            }
-                                            "02n" -> {
-                                                R.drawable.i02n
-                                            }
-                                            "03d" -> {
-                                                R.drawable.i03d
-                                            }
-                                            "03n" -> {
-                                                R.drawable.i03n
-                                            }
-                                            "04d" -> {
-                                                R.drawable.i04d
-                                            }
-                                            "04n" -> {
-                                                R.drawable.i04n
-                                            }
-                                            "09d" -> {
-                                                R.drawable.i09d
-                                            }
-                                            "09n" -> {
-                                                R.drawable.i09d
-                                            }
-                                            "10d" -> {
-                                                R.drawable.i09d
-                                            }
-                                            "10n" -> {
-                                                R.drawable.i09d
-                                            }
-                                            "11d" -> {
-                                                R.drawable.i11d
-                                            }
-                                            "11n" -> {
-                                                R.drawable.i11d
-                                            }
-                                            "13d" -> {
-                                                R.drawable.i13n
-                                            }
-                                            "13n" -> {
-                                                R.drawable.i13n
-                                            }
-                                            "50d" -> {
-                                                R.drawable.i50n
-                                            }
-                                            "50n" -> {
-                                                R.drawable.i50n
-                                            }
-                                            else -> {
-                                                R.drawable.i01d
-                                            }
-                                        }
+                                        id = getWeatherImage(oneDayForcast[0]?.weather?.first()?.icon!!)
                                     ),
                                     contentDescription = "",
                                     modifier = Modifier
                                         .height((height * 0.17).dp)
-                                        .width((width * 0.5).dp),
+                                        .width((width * 0.5).dp)
+                                        .padding(start = 20.dp),
                                     alignment = Alignment.TopCenter
                                 )
                             }
                         }
-                        item { Spacer(modifier = Modifier.height(15.dp)) }
-                        items(oneDayForcast) {
 
-                            Card(
+                        item { Spacer(modifier = Modifier.height(1.dp)) }
+
+                        items(oneDayForcast) {
+                            Column(
                                 modifier = Modifier
-                                    .fillMaxSize()
-                                    .height(90.dp)
-                                    .padding(horizontal = 20.dp, vertical = 7.dp),
-                                backgroundColor = Color.White,
-                                shape = RoundedCornerShape(15.dp)
                             ) {
-                                Row(
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier.padding(horizontal = 15.dp)
+                                Card(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(100.dp)
+                                        .padding(horizontal = 20.dp, vertical = 7.dp),
+                                    backgroundColor = Color.White,
+                                    border = BorderStroke(0.dp, Color.White),
+                                    elevation = 0.dp,
+                                    shape = RoundedCornerShape(15.dp)
                                 ) {
-                                    Text(
-                                        text = dateCompare(
-                                            it!!.dt_txt.toString(),
-                                            "yyyy-MM-dd HH:mm:ss",
-                                            "HH:mm"
-                                        ).toString(),
-                                        textAlign = TextAlign.Center,
-                                        color = skybluedark,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 20.sp
-                                    )
-                                    Text(
-                                        text = buildAnnotatedString {
-                                            withStyle(
-                                                SpanStyle(
-                                                    fontSize = 20.sp
-                                                )
-                                            ) {
-                                                append("${((it.main!!.temp!! - 273.15)).toInt()}")
-                                            }
-                                            withStyle(
-                                                SpanStyle(
-                                                    baselineShift = BaselineShift.Superscript,
-                                                    fontSize = 15.sp
-                                                )
-                                            ) {
-                                                append("o")
-                                            }
-                                            append(
-                                                "/${((it.main!!.feels_like!! - 273.15)).toInt()}"
-                                            )
-                                            withStyle(
-                                                SpanStyle(
-                                                    baselineShift = BaselineShift.Superscript,
-                                                    fontSize = 10.sp
-                                                )
-                                            ) {
-                                                append("o")
-                                            }
-                                        },
-                                        textAlign = TextAlign.Center,
-                                        color = Color.LightGray,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                    Column(verticalArrangement = Arrangement.SpaceBetween) {
-                                        Image(
-                                            painter = painterResource(
-                                                id = when (it.weather?.first()?.icon) {
-                                                    "01d" -> {
-                                                        R.drawable.i01d
-                                                    }
-                                                    "01n" -> {
-                                                        R.drawable.i01n
-                                                    }
-                                                    "02d" -> {
-                                                        R.drawable.i02d
-                                                    }
-                                                    "02n" -> {
-                                                        R.drawable.i02n
-                                                    }
-                                                    "03d" -> {
-                                                        R.drawable.i03d
-                                                    }
-                                                    "03n" -> {
-                                                        R.drawable.i03n
-                                                    }
-                                                    "04d" -> {
-                                                        R.drawable.i04d
-                                                    }
-                                                    "04n" -> {
-                                                        R.drawable.i04n
-                                                    }
-                                                    "09d" -> {
-                                                        R.drawable.i09d
-                                                    }
-                                                    "09n" -> {
-                                                        R.drawable.i09d
-                                                    }
-                                                    "10d" -> {
-                                                        R.drawable.i09d
-                                                    }
-                                                    "10n" -> {
-                                                        R.drawable.i09d
-                                                    }
-                                                    "11d" -> {
-                                                        R.drawable.i11d
-                                                    }
-                                                    "11n" -> {
-                                                        R.drawable.i11d
-                                                    }
-                                                    "13d" -> {
-                                                        R.drawable.i13n
-                                                    }
-                                                    "13n" -> {
-                                                        R.drawable.i13n
-                                                    }
-                                                    "50d" -> {
-                                                        R.drawable.i50n
-                                                    }
-                                                    "50n" -> {
-                                                        R.drawable.i50n
-                                                    }
-                                                    else -> {
-                                                        R.drawable.i01d
-                                                    }
-                                                }
-                                            ),
-                                            contentDescription = "",
-                                            modifier = Modifier.height(35.dp),
+                                    Row(
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        modifier = Modifier.padding(horizontal = 15.dp)
+                                    ) {
+                                        Text(
+                                            text = dateCompare(
+                                                it!!.dt_txt.toString(),
+                                                "yyyy-MM-dd HH:mm:ss",
+                                                "HH:mm, EEEE"
+                                            ).toString(),
+                                            textAlign = TextAlign.Center,
+                                            color = skybluedark,
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 14.sp
                                         )
                                         Text(
-                                            text = it.weather?.first()?.main.toString(),
-                                            color = Purple200,
+                                            text = buildAnnotatedString {
+                                                withStyle(
+                                                    SpanStyle(
+                                                        fontSize = 25.sp
+                                                    )
+                                                ) {
+                                                    append("${((it.main!!.temp!! - 273.15)).toInt()}°")
+                                                }
+
+                                                append(
+                                                    "/${((it.main!!.feels_like!! - 273.15)).toInt()}°"
+                                                )
+                                            },
+                                            textAlign = TextAlign.Center,
+                                            color = Color.LightGray,
+                                            fontSize = 16.sp,
                                             fontWeight = FontWeight.Bold
                                         )
+                                        Column(
+                                            verticalArrangement = Arrangement.SpaceBetween,
+                                            horizontalAlignment = Alignment.CenterHorizontally
+                                        ) {
+                                            Image(
+                                                painter = painterResource(
+                                                    getWeatherImage(it.weather?.first()?.icon!!)
+                                                ),
+                                                contentDescription = "",
+                                                modifier = Modifier.height(35.dp),
+                                            )
+                                            Text(
+                                                text = it.weather.first()?.main.toString(),
+                                                color = purpleText,
+                                                fontSize = 12.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                textAlign = TextAlign.Center
+                                            )
+                                        }
                                     }
                                 }
                             }
                         }
+
+                        item { Spacer(modifier = Modifier.height(25.dp)) }
+
                     }
                 }
+
             }
         }
     }

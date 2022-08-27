@@ -26,7 +26,7 @@
             android:exported="true"
             android:label="@string/app_name"
             android:screenOrientation="portrait"
-            android:theme="@android:style/Theme.Material.Light.NoActionBar.TranslucentDecor">
+            android:theme="@style/Theme.CurrentWeather">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
