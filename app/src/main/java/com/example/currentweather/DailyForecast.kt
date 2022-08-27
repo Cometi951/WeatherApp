@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.currentweather.ui.theme.*
 import com.example.currentweather.utils.dateCompare
+import com.example.currentweather.utils.getWeatherImage
 import com.example.currentweather.viewModel.Forecast3HoursStates
 import com.example.currentweather.viewModel.MainViewModel
 import java.util.*
@@ -56,7 +57,7 @@ fun DailyForecast(viewModel: MainViewModel, navController: NavHostController) {
             }
             var currentDate by remember { mutableStateOf(dailyForecast.first()) }
 
-            var oneDayForcast = forcastState.data.list.filter {
+            val oneDayForcast = forcastState.data.list.filter {
                 dateCompare(
                     it!!.dt_txt!!,
                     "yyyy-MM-dd HH:mm:ss",
@@ -66,54 +67,74 @@ fun DailyForecast(viewModel: MainViewModel, navController: NavHostController) {
 
             Scaffold(
                 topBar = {
-                Row(
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(60.dp)
-                        .background(lightblue)
-                        .padding(horizontal = 20.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-
-                    Card(
-                        shape = RoundedCornerShape(12.dp), modifier = Modifier
-                            .height(40.dp)
-                            .width(40.dp)
-                            .clickable(indication = null, interactionSource = remember {
-                                MutableInteractionSource()
-                            }) {
-                                navController.popBackStack()
-                            }, backgroundColor = Color.White
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(60.dp)
+                            .background(lightblue)
+                            .padding(horizontal = 20.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(
-                            Icons.Default.ArrowBackIosNew,
-                            contentDescription = "",
-                            tint = Color.Black,
-                            modifier = Modifier.padding(8.dp)
+
+                        Card(
+                            shape = RoundedCornerShape(12.dp), modifier = Modifier
+                                .height(40.dp)
+                                .width(40.dp)
+                                .clickable(indication = null, interactionSource = remember {
+                                    MutableInteractionSource()
+                                }) {
+                                    navController.popBackStack()
+                                }, backgroundColor = Color.White
+                        ) {
+                            Icon(
+                                Icons.Default.ArrowBackIosNew,
+                                contentDescription = "",
+                                tint = Color.Black,
+                                modifier = Modifier.padding(8.dp)
+                            )
+                        }
+                        Text(
+                            text = "Next 5 Days",
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
                         )
+                        Spacer(modifier = Modifier.width(40.dp))
                     }
-                    Text(
-                        text = "Next 5 Days",
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White
+                }) {
+                Box {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(lightblue)
                     )
-                    Spacer(modifier = Modifier.width(40.dp))
-                }
-            }) {
-                Box() {
-                    Box(modifier = Modifier
-                        .fillMaxSize()
-                        .background(lightblue))
 
                     Card(
                         shape = RoundedCornerShape(topEnd = 35.dp, topStart = 35.dp),
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(top = (height * 0.4).dp),
-                        backgroundColor = backgroundAllTheme
-                    ) {}
+                            .padding(top = (height * 0.35).dp),
+                        backgroundColor = Color.White
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(
+                                    brush =
+                                    Brush.horizontalGradient(
+                                        colors = listOf(
+                                            Color.White,
+                                            Color.Black.copy(alpha = 0.06f),
+                                            Color.Black.copy(alpha = 0.06f),
+                                            Color.Black.copy(alpha = 0.06f),
+                                            Color.Black.copy(alpha = 0.06f),
+                                            Color.White
+                                        )
+                                    )
+                                )
+                        )
+                    }
 
                     LazyColumn() {
 
@@ -167,65 +188,7 @@ fun DailyForecast(viewModel: MainViewModel, navController: NavHostController) {
                                         ) {
                                             Image(
                                                 painter = painterResource(
-                                                    id = when (forcastState.data.list?.get(it)!!.weather!![0]!!.icon) {
-                                                        "01d" -> {
-                                                            R.drawable.i01d
-                                                        }
-                                                        "01n" -> {
-                                                            R.drawable.i01n
-                                                        }
-                                                        "02d" -> {
-                                                            R.drawable.i02d
-                                                        }
-                                                        "02n" -> {
-                                                            R.drawable.i02n
-                                                        }
-                                                        "03d" -> {
-                                                            R.drawable.i03d
-                                                        }
-                                                        "03n" -> {
-                                                            R.drawable.i03n
-                                                        }
-                                                        "04d" -> {
-                                                            R.drawable.i04d
-                                                        }
-                                                        "04n" -> {
-                                                            R.drawable.i04n
-                                                        }
-                                                        "09d" -> {
-                                                            R.drawable.i09d
-                                                        }
-                                                        "09n" -> {
-                                                            R.drawable.i09d
-                                                        }
-                                                        "10d" -> {
-                                                            R.drawable.i09d
-                                                        }
-                                                        "10n" -> {
-                                                            R.drawable.i09d
-                                                        }
-                                                        "11d" -> {
-                                                            R.drawable.i11d
-                                                        }
-                                                        "11n" -> {
-                                                            R.drawable.i11d
-                                                        }
-                                                        "13d" -> {
-                                                            R.drawable.i13n
-                                                        }
-                                                        "13n" -> {
-                                                            R.drawable.i13n
-                                                        }
-                                                        "50d" -> {
-                                                            R.drawable.i50n
-                                                        }
-                                                        "50n" -> {
-                                                            R.drawable.i50n
-                                                        }
-                                                        else -> {
-                                                            R.drawable.i01d
-                                                        }
-                                                    }
+                                                    id = getWeatherImage(forcastState.data.list[it]!!.weather!![0]!!.icon!!)
                                                 ),
                                                 contentDescription = "",
                                                 modifier = Modifier
@@ -246,7 +209,7 @@ fun DailyForecast(viewModel: MainViewModel, navController: NavHostController) {
                                                     color = if (dailyForecast.elementAt(it) == currentDate) {
                                                         purpleText
                                                     } else Color.White,
-                                                    fontSize = 30.sp,
+                                                    fontSize = 24.sp,
                                                     fontWeight = FontWeight.Bold,
                                                     textAlign = TextAlign.Center
                                                 )
@@ -278,23 +241,22 @@ fun DailyForecast(viewModel: MainViewModel, navController: NavHostController) {
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(start = 20.dp, end = 20.dp)
-                                    .clip(
-                                        RoundedCornerShape(
-                                            bottomEnd = 25.dp,
-                                            bottomStart = 25.dp
-                                        )
-                                    )
-                                    .background(lightblue)
+                                    .padding(start = 20.dp, bottom = 20.dp, end = 20.dp)
                             ) {
 
+                                Spacer(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(55.dp)
+                                        .background(lightblue)
+                                )
                                 Card(
-                                    elevation = 0.dp,
+                                    elevation = 20.dp,
                                     shape = RoundedCornerShape(25.dp),
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(top = 35.dp)
-                                        .height((height * 0.4).dp)
+                                        .padding(top = 35.dp, bottom = 0.dp)
+//                                        .height((height * 0.4).dp)
                                 ) {
                                     Column(
                                         modifier = Modifier
@@ -313,28 +275,22 @@ fun DailyForecast(viewModel: MainViewModel, navController: NavHostController) {
                                                 .fillMaxWidth()
                                                 .background(Color.Transparent)
                                         ) {
-
                                             Row(
                                                 horizontalArrangement = Arrangement.SpaceBetween,
                                                 modifier = Modifier
                                                     .padding(
                                                         top = 0.dp,
-                                                        bottom = 30.dp,
+                                                        bottom = 20.dp,
                                                         start = 30.dp,
                                                         end = 10.dp
                                                     )
-                                                    .height((height * 0.2).dp),
+                                                    .height((height * 0.22).dp),
                                             ) {
                                                 Text(
-                                                    oneDayForcast.first()?.weather?.first()!!.description!!.substring(
-                                                        0,
-                                                        1
-                                                    )
-                                                        .toUpperCase() + oneDayForcast.first()?.weather?.first()!!.description!!.substring(
-                                                        1
-                                                    ).toLowerCase(),
+                                                    oneDayForcast.first()?.weather?.first()!!.description!!.substring(0, 1).toUpperCase(Locale.ROOT)
+                                                            + oneDayForcast.first()?.weather?.first()!!.description!!.substring(1).toLowerCase(Locale.ROOT),
                                                     color = Color.White,
-                                                    fontSize = 27.sp,
+                                                    fontSize = 24.sp,
                                                     fontWeight = FontWeight.W800,
                                                     fontFamily = FontFamily.Serif,
                                                     modifier = Modifier
@@ -378,21 +334,23 @@ fun DailyForecast(viewModel: MainViewModel, navController: NavHostController) {
                                                     )
                                                 }
                                             }
-
                                         }
                                         Row(
-                                            horizontalArrangement = Arrangement.SpaceEvenly,
+                                            horizontalArrangement = Arrangement.SpaceAround,
                                             modifier = Modifier
+                                                .padding(bottom = 10.dp, start = 20.dp, end = 20.dp)
                                                 .fillMaxWidth()
                                         ) {
-                                            Column() {
-
+                                            Column(
+                                                Modifier.weight(1f),
+                                                horizontalAlignment = Alignment.CenterHorizontally
+                                            ) {
                                                 Card(
                                                     elevation = 0.dp,
                                                     shape = RoundedCornerShape(25.dp),
                                                     modifier = Modifier
                                                         .padding(top = 0.dp),
-                                                    backgroundColor = Color.White.copy(alpha = 0.1f)
+                                                    backgroundColor = Color.White.copy(alpha = 0.1f),
                                                 ) {
                                                     Image(
                                                         painter = painterResource(id = R.drawable.i04d),
@@ -406,7 +364,7 @@ fun DailyForecast(viewModel: MainViewModel, navController: NavHostController) {
                                                 }
                                                 Text(
                                                     modifier = Modifier
-                                                        .width((width * 0.18).dp)
+                                                        .fillMaxWidth()
                                                         .padding(vertical = 10.dp),
                                                     text = oneDayForcast[0]?.clouds?.all.toString() + "%",
                                                     fontWeight = FontWeight.Bold,
@@ -414,8 +372,10 @@ fun DailyForecast(viewModel: MainViewModel, navController: NavHostController) {
                                                     color = Color.White
                                                 )
                                             }
-                                            Column() {
-
+                                            Column(
+                                                Modifier.weight(1f),
+                                                horizontalAlignment = Alignment.CenterHorizontally
+                                            ) {
                                                 Card(
                                                     elevation = 0.dp,
                                                     shape = RoundedCornerShape(25.dp),
@@ -436,7 +396,7 @@ fun DailyForecast(viewModel: MainViewModel, navController: NavHostController) {
                                                 }
                                                 Text(
                                                     modifier = Modifier
-                                                        .width((width * 0.18).dp)
+                                                        .fillMaxWidth()
                                                         .padding(vertical = 10.dp),
                                                     text = (oneDayForcast[0]?.wind?.speed!! * 3600 / 1000).toInt()
                                                         .toString() + " km/h",
@@ -445,8 +405,10 @@ fun DailyForecast(viewModel: MainViewModel, navController: NavHostController) {
                                                     color = Color.White
                                                 )
                                             }
-                                            Column() {
-
+                                            Column(
+                                                Modifier.weight(1f),
+                                                horizontalAlignment = Alignment.CenterHorizontally
+                                            ) {
                                                 Card(
                                                     elevation = 0.dp,
                                                     shape = RoundedCornerShape(25.dp),
@@ -464,10 +426,9 @@ fun DailyForecast(viewModel: MainViewModel, navController: NavHostController) {
                                                         alignment = Alignment.TopCenter
                                                     )
                                                 }
-
                                                 Text(
                                                     modifier = Modifier
-                                                        .width((width * 0.18).dp)
+                                                        .fillMaxWidth()
                                                         .padding(vertical = 10.dp),
                                                     text = oneDayForcast[0]?.main?.humidity.toString() + "%",
                                                     fontWeight = FontWeight.Bold,
@@ -476,70 +437,11 @@ fun DailyForecast(viewModel: MainViewModel, navController: NavHostController) {
                                                 )
                                             }
                                         }
-
                                     }
                                 }
                                 Image(
                                     painter = painterResource(
-                                        id = when (oneDayForcast[0]?.weather?.first()?.icon) {
-                                            "01d" -> {
-                                                R.drawable.i01d
-                                            }
-                                            "01n" -> {
-                                                R.drawable.i01n
-                                            }
-                                            "02d" -> {
-                                                R.drawable.i02d
-                                            }
-                                            "02n" -> {
-                                                R.drawable.i02n
-                                            }
-                                            "03d" -> {
-                                                R.drawable.i03d
-                                            }
-                                            "03n" -> {
-                                                R.drawable.i03n
-                                            }
-                                            "04d" -> {
-                                                R.drawable.i04d
-                                            }
-                                            "04n" -> {
-                                                R.drawable.i04n
-                                            }
-                                            "09d" -> {
-                                                R.drawable.i09d
-                                            }
-                                            "09n" -> {
-                                                R.drawable.i09d
-                                            }
-                                            "10d" -> {
-                                                R.drawable.i09d
-                                            }
-                                            "10n" -> {
-                                                R.drawable.i09d
-                                            }
-                                            "11d" -> {
-                                                R.drawable.i11d
-                                            }
-                                            "11n" -> {
-                                                R.drawable.i11d
-                                            }
-                                            "13d" -> {
-                                                R.drawable.i13n
-                                            }
-                                            "13n" -> {
-                                                R.drawable.i13n
-                                            }
-                                            "50d" -> {
-                                                R.drawable.i50n
-                                            }
-                                            "50n" -> {
-                                                R.drawable.i50n
-                                            }
-                                            else -> {
-                                                R.drawable.i01d
-                                            }
-                                        }
+                                        id = getWeatherImage(oneDayForcast[0]?.weather?.first()?.icon!!)
                                     ),
                                     contentDescription = "",
                                     modifier = Modifier
@@ -551,19 +453,11 @@ fun DailyForecast(viewModel: MainViewModel, navController: NavHostController) {
                             }
                         }
 
-                        item { Spacer(modifier = Modifier.height(15.dp)) }
+                        item { Spacer(modifier = Modifier.height(1.dp)) }
 
                         items(oneDayForcast) {
-                            Column(modifier = Modifier.background(
-                                brush =
-                                Brush.horizontalGradient(
-                                    colors = listOf(
-                                        Color.Transparent,
-                                        lightPurple.copy(alpha = 0.06f),
-                                        Color.Transparent
-                                    )
-                                )
-                            )
+                            Column(
+                                modifier = Modifier
                             ) {
                                 Card(
                                     modifier = Modifier
@@ -589,13 +483,13 @@ fun DailyForecast(viewModel: MainViewModel, navController: NavHostController) {
                                             textAlign = TextAlign.Center,
                                             color = skybluedark,
                                             fontWeight = FontWeight.Bold,
-                                            fontSize = 16.sp
+                                            fontSize = 14.sp
                                         )
                                         Text(
                                             text = buildAnnotatedString {
                                                 withStyle(
                                                     SpanStyle(
-                                                        fontSize = 27.sp
+                                                        fontSize = 25.sp
                                                     )
                                                 ) {
                                                     append("${((it.main!!.temp!! - 273.15)).toInt()}°")
@@ -610,75 +504,21 @@ fun DailyForecast(viewModel: MainViewModel, navController: NavHostController) {
                                             fontSize = 16.sp,
                                             fontWeight = FontWeight.Bold
                                         )
-                                        Column(verticalArrangement = Arrangement.SpaceBetween) {
+                                        Column(
+                                            verticalArrangement = Arrangement.SpaceBetween,
+                                            horizontalAlignment = Alignment.CenterHorizontally
+                                        ) {
                                             Image(
                                                 painter = painterResource(
-                                                    id = when (it.weather?.first()?.icon) {
-                                                        "01d" -> {
-                                                            R.drawable.i01d
-                                                        }
-                                                        "01n" -> {
-                                                            R.drawable.i01n
-                                                        }
-                                                        "02d" -> {
-                                                            R.drawable.i02d
-                                                        }
-                                                        "02n" -> {
-                                                            R.drawable.i02n
-                                                        }
-                                                        "03d" -> {
-                                                            R.drawable.i03d
-                                                        }
-                                                        "03n" -> {
-                                                            R.drawable.i03n
-                                                        }
-                                                        "04d" -> {
-                                                            R.drawable.i04d
-                                                        }
-                                                        "04n" -> {
-                                                            R.drawable.i04n
-                                                        }
-                                                        "09d" -> {
-                                                            R.drawable.i09d
-                                                        }
-                                                        "09n" -> {
-                                                            R.drawable.i09d
-                                                        }
-                                                        "10d" -> {
-                                                            R.drawable.i09d
-                                                        }
-                                                        "10n" -> {
-                                                            R.drawable.i09d
-                                                        }
-                                                        "11d" -> {
-                                                            R.drawable.i11d
-                                                        }
-                                                        "11n" -> {
-                                                            R.drawable.i11d
-                                                        }
-                                                        "13d" -> {
-                                                            R.drawable.i13n
-                                                        }
-                                                        "13n" -> {
-                                                            R.drawable.i13n
-                                                        }
-                                                        "50d" -> {
-                                                            R.drawable.i50n
-                                                        }
-                                                        "50n" -> {
-                                                            R.drawable.i50n
-                                                        }
-                                                        else -> {
-                                                            R.drawable.i01d
-                                                        }
-                                                    }
+                                                    getWeatherImage(it.weather?.first()?.icon!!)
                                                 ),
                                                 contentDescription = "",
                                                 modifier = Modifier.height(35.dp),
                                             )
                                             Text(
-                                                text = it.weather?.first()?.main.toString(),
+                                                text = it.weather.first()?.main.toString(),
                                                 color = purpleText,
+                                                fontSize = 12.sp,
                                                 fontWeight = FontWeight.Bold,
                                                 textAlign = TextAlign.Center
                                             )
@@ -686,8 +526,10 @@ fun DailyForecast(viewModel: MainViewModel, navController: NavHostController) {
                                     }
                                 }
                             }
-
                         }
+
+                        item { Spacer(modifier = Modifier.height(25.dp)) }
+
                     }
                 }
 

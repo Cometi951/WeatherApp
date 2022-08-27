@@ -1,11 +1,38 @@
 package com.example.currentweather.utils
 
+import android.content.Context
 import android.text.format.DateFormat
 import android.util.Log
+import android.widget.Toast
+import com.example.currentweather.R
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.*
 
+val imageMap: MutableMap<String, Int> = mapOf<String, Int>(
+    "01d" to R.drawable.i01d,
+    "01n" to R.drawable.i01n,
+    "02d" to R.drawable.i02d,
+    "02n" to R.drawable.i02n,
+    "03d" to R.drawable.i03d,
+    "03n" to R.drawable.i03n,
+    "04d" to R.drawable.i04d,
+    "04n" to R.drawable.i04n,
+    "09d" to R.drawable.i09d,
+    "09n" to R.drawable.i09d,
+    "10d" to R.drawable.i09d,
+    "10n" to R.drawable.i09d,
+    "11d" to R.drawable.i11d,
+    "11n" to R.drawable.i11d,
+    "13d" to R.drawable.i13n,
+    "13n" to R.drawable.i13n,
+    "50d" to R.drawable.i50n,
+    "50n" to R.drawable.i50n
+) as MutableMap<String, Int>
+
+fun getWeatherImage(key: String): Int {
+    return imageMap[key]!!
+}
 
 fun getDate(milliSeconds: Long, dateFormat: String?): String? {
     // Create a DateFormatter object for displaying date in specified format.
@@ -42,7 +69,7 @@ fun getmDate(time1: Long): String? {
     return date + ""
 }
 
-fun dateCompare(dt: String, convertFromPattern:String, convertToPattern:String): String? {
+fun dateCompare(dt: String, convertFromPattern: String, convertToPattern: String): String? {
 
     //String date="2017-05-23T06:25:50";
     var dt: String? = dt
@@ -60,3 +87,6 @@ fun dateCompare(dt: String, convertFromPattern:String, convertToPattern:String):
     }
     return dt
 }
+
+fun Context.showToast(msg: String) =
+    Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()

@@ -23,6 +23,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.currentweather.screen.Screen
+import com.example.currentweather.utils.showToast
 import com.example.currentweather.viewModel.MainViewModel
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.ResolvableApiException
@@ -86,16 +87,10 @@ class MainActivity : ComponentActivity(), LocationListener {
                         Manifest.permission.ACCESS_COARSE_LOCATION
                     ) == PackageManager.PERMISSION_GRANTED
                 ) {
-                    Toast.makeText(applicationContext, "Permission granted", Toast.LENGTH_SHORT)
-                        .show()
-
+                    showToast("Permission granted")
                     getCurrentLocation()
                 } else {
-                    Toast.makeText(
-                        applicationContext,
-                        "Without Permission granted app won't work, Please give Location permission",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    showToast("Without Permission granted app won't work, Please give Location permission")
                 }
                 return
             }
@@ -122,7 +117,7 @@ class MainActivity : ComponentActivity(), LocationListener {
             })
             .addOnSuccessListener { location: Location? ->
                 if (location == null)
-                    Toast.makeText(this, "Cannot get location.", Toast.LENGTH_SHORT).show()
+                    showToast("Cannot get location.")
                 else {
                     location.let {
                         viewModel.getCurrentWeather(it.latitude, it.longitude)
@@ -186,8 +181,7 @@ class MainActivity : ComponentActivity(), LocationListener {
                         })
                         .addOnSuccessListener { location: Location? ->
                             if (location == null)
-                                Toast.makeText(this, "Cannot get location.", Toast.LENGTH_SHORT)
-                                    .show()
+                                showToast("Cannot get location.")
                             else {
                                 location.let {
                                     viewModel.getCurrentWeather(it.latitude, it.longitude)
