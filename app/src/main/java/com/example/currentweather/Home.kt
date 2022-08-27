@@ -4,32 +4,32 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.ArrowForwardIos
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.BaselineShift
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.currentweather.model.ForeCast3HoursModel
+import com.example.currentweather.screen.Screen
 import com.example.currentweather.ui.theme.*
 import com.example.currentweather.utils.convertDate
 import com.example.currentweather.utils.dateCompare
@@ -37,9 +37,8 @@ import com.example.currentweather.utils.getmDate
 import com.example.currentweather.viewModel.CurrentWeatherStates
 import com.example.currentweather.viewModel.Forecast3HoursStates
 import com.example.currentweather.viewModel.MainViewModel
-import com.example.currentweather.screen.Screen
+import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.collections.ArrayList
 
 @Composable
 fun Home(viewModel: MainViewModel, navController: NavHostController) {
@@ -47,9 +46,11 @@ fun Home(viewModel: MainViewModel, navController: NavHostController) {
     val height = LocalConfiguration.current.screenHeightDp
     val width = LocalConfiguration.current.screenWidthDp
     var todayDate: String = ""
+    var todayTime = SimpleDateFormat("HH.mm", Locale.getDefault()).format(Date()).toFloat()
     var todayDateList: ArrayList<ForeCast3HoursModel.Data> = ArrayList()
 
-    Scaffold(backgroundColor = backgroundAllTheme
+    Scaffold(
+        backgroundColor = backgroundAllTheme
     ) {
 
         when (val state = viewModel.currentWeather.collectAsState().value) {
@@ -84,7 +85,7 @@ fun Home(viewModel: MainViewModel, navController: NavHostController) {
                         Column(Modifier.weight(6f)) {
                             Text(
                                 text = state.data.name!!,
-                                fontSize = 23.sp,
+                                fontSize = 27.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.Black
                             )
@@ -96,22 +97,54 @@ fun Home(viewModel: MainViewModel, navController: NavHostController) {
                                 fontSize = 13.sp
                             )
                         }
-
-                        Card(
-                            elevation = 0.dp,
-                            shape = RoundedCornerShape(30.dp),
+                        Box(
                             modifier = Modifier
-                                .wrapContentSize()
-                                .weight(4f)
-                                .padding(10.dp),
-                            backgroundColor = Color.Transparent
-                        ) {
+                                .background(Color.Transparent)
+                            ) {
+                            BottomShadow(alpha = 0.60f,width = 98.dp,height= 30.dp,yOffset = 72.dp)
                             Image(
-                                modifier = Modifier,
                                 painter = painterResource(id = R.drawable.maps),
-                                contentDescription = "",
+                                contentDescription = "Localized description",
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier
+                                    .size(100.dp, 100.dp)
+                                    .clip(RoundedCornerShape(20.dp))
                             )
+
                         }
+
+//                        Surface(
+//                            color = Color.Transparent,
+//                            elevation = 80.dp,
+//                            shape = RoundedCornerShape(20.dp),
+//                            modifier = Modifier.width(120.dp).height(120.dp)
+//
+//                        ) {
+//                            Column {
+//                                Image(
+//                                    painter = painterResource(id = R.drawable.maps),
+//                                    contentDescription = "",
+//                                    contentScale = ContentScale.Crop,
+//                                )
+//                                BottomShadow(alpha = 0.1f, height = 50.dp)
+//                            }
+//                        }
+
+//                        Card(
+//                            elevation = 0.dp,
+//                            shape = RoundedCornerShape(30.dp),
+//                            modifier = Modifier
+//                                .wrapContentSize()
+//                                .weight(4f)
+//                                .padding(10.dp),
+//                            backgroundColor = Color.Transparent
+//                        ) {
+//                            Image(
+//                                modifier = Modifier,
+//                                painter = painterResource(id = R.drawable.maps),
+//                                contentDescription = "",
+//                            )
+//                        }
 
                     }
                     Column(
@@ -129,7 +162,7 @@ fun Home(viewModel: MainViewModel, navController: NavHostController) {
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(top = 35.dp)
-                                    .height((height * 0.25).dp)
+                                    .height((height * 0.27).dp)
                             ) {
                                 Row(
                                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -151,15 +184,19 @@ fun Home(viewModel: MainViewModel, navController: NavHostController) {
                                         .fillMaxSize(),
                                 ) {
                                     Text(
-                                        "${state.data.weather!![0]!!.description}".uppercase(
-                                            Locale.getDefault()
-                                        ),
+                                        state.data.weather!![0]!!.description!!.substring(0, 1)
+                                            .toUpperCase() + state.data.weather!![0]!!.description!!.substring(
+                                            1
+                                        ).toLowerCase(),
                                         color = Color.White,
-                                        fontSize = 20.sp,
+                                        fontSize = 27.sp,
                                         fontWeight = FontWeight.W800,
-                                        modifier = Modifier.align(Alignment.Bottom)
+                                        fontFamily = FontFamily.Serif,
+                                        modifier = Modifier
+                                            .align(Alignment.Bottom)
+                                            .weight(6f)
                                     )
-                                    Column() {
+                                    Column(Modifier.weight(5f), horizontalAlignment = Alignment.CenterHorizontally) {
                                         Text(
                                             text = "${((state.data.main!!.temp!! - 273.15)).toInt()}°",
                                             modifier = Modifier
@@ -371,21 +408,21 @@ fun Home(viewModel: MainViewModel, navController: NavHostController) {
                     when (val forcastState =
                         viewModel.forecast3Hours.collectAsState().value) {
                         is Forecast3HoursStates.Loading -> {
-                            Box( Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
+                            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                                 CircularProgressIndicator()
                             }
                         }
 
                         is Forecast3HoursStates.Error -> {
 
-                            Box( Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
+                            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                                 Text(text = forcastState.message)
                             }
                         }
 
                         is Forecast3HoursStates.Loaded -> {
 
-                            if (!todayDate.isNotBlank()) {
+                            if (todayDate.isBlank()) {
                                 todayDate = dateCompare(
                                     forcastState.data.list!![0]!!.dt_txt!!,
                                     "yyyy-MM-dd HH:mm:ss",
@@ -399,7 +436,6 @@ fun Home(viewModel: MainViewModel, navController: NavHostController) {
                                     "yyyy-MM-dd"
                                 )
                             } as ArrayList<ForeCast3HoursModel.Data>
-
 
                             Row(
                                 modifier = Modifier
@@ -420,6 +456,7 @@ fun Home(viewModel: MainViewModel, navController: NavHostController) {
                                     text = "Today",
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 25.sp,
+                                    color = Color.Black,
                                     modifier = Modifier.align(Alignment.CenterVertically)
                                 )
 
@@ -455,14 +492,12 @@ fun Home(viewModel: MainViewModel, navController: NavHostController) {
                                         brush = Brush.verticalGradient(
                                             colors = listOf(
                                                 backgroundAllTheme,
-                                                backgroundBlue,
+                                                lightPurple.copy(alpha = 0.25f),
                                                 backgroundAllTheme,
                                             )
                                         )
                                     )
-                                    .height(130.dp)
-                                    .padding(vertical = 15.dp)
-                                    ,
+                                    .padding(vertical = 15.dp),
                                 horizontalArrangement = Arrangement.spacedBy(20.dp)
                             ) {
                                 item {
@@ -470,32 +505,58 @@ fun Home(viewModel: MainViewModel, navController: NavHostController) {
                                     }
                                 }
                                 items(todayDateList.size) {
+
+                                    var nerestTime = (dateCompare(
+                                        todayDateList[it].dt_txt!!,
+                                        "yyyy-MM-dd HH:mm:ss",
+                                        "HH.ss"
+                                    )!!.toFloat() > (todayTime - 1.5) &&
+                                            dateCompare(
+                                                todayDateList[it].dt_txt!!,
+                                                "yyyy-MM-dd HH:mm:ss",
+                                                "HH.ss"
+                                            )!!.toFloat() < (todayTime + 1.5)
+                                            )
                                     Card(
                                         shape = RoundedCornerShape(50.dp),
-                                        elevation = 0.dp,
+                                        elevation = if(nerestTime) 7.dp else 0.dp,
                                         modifier = Modifier
-                                            .fillMaxHeight(),
-                                        border = BorderStroke(0.dp, Color.Transparent)
+                                            .fillMaxHeight()
                                     ) {
                                         Column(
                                             verticalArrangement = Arrangement.SpaceEvenly,
                                             horizontalAlignment = Alignment.CenterHorizontally,
                                             modifier = Modifier
                                                 .background(
-                                                    brush = Brush.verticalGradient(
-                                                        colors = listOf(
-                                                            Color.White,
-                                                            Color.White
+                                                    brush =
+                                                    if (nerestTime) {
+                                                        Brush.verticalGradient(
+                                                            colors = listOf(
+                                                                lightPurple,
+                                                                darkPurple
+                                                            )
                                                         )
-                                                    )
+                                                    } else {
+                                                        Brush.verticalGradient(
+                                                            colors = listOf(
+                                                                Color.White,
+                                                                Color.White
+                                                            )
+                                                        )
+                                                    }
                                                 )
-                                                .width(55.dp)
+                                                .height(125.dp)
+                                                .width(68.dp)
                                                 .padding(8.dp)
                                         ) {
                                             Text(
                                                 text = convertDate(todayDateList[it].dt_txt!!)!!,
-                                                color = Color.Gray.copy(alpha = 0.4f),
-                                                fontSize = 13.sp,
+                                                color = if (nerestTime) {
+                                                    Color.White
+                                                } else {
+                                                    Color.Gray.copy(alpha = 0.4f)
+                                                },
+                                                fontSize = 11.sp,
                                                 fontWeight = FontWeight.Bold,
                                                 textAlign = TextAlign.End
                                             )
@@ -568,14 +629,22 @@ fun Home(viewModel: MainViewModel, navController: NavHostController) {
                                                 alignment = Alignment.TopCenter
                                             )
                                             Text(
-                                                text ="${((todayDateList[it].main!!.temp!! - 273.15)).toInt()}°"
-                                                , color = Color.Gray.copy(alpha = 0.4f),
-                                                fontSize = 19.sp,
+                                                text = " ${((todayDateList[it].main!!.temp!! - 273.15)).toInt()}°",
+                                                color = if (nerestTime) {
+                                                    Color.White
+                                                } else {
+                                                    Color.Gray.copy(alpha = 0.4f)
+                                                },
+                                                fontSize = 18.sp,
                                                 fontWeight = FontWeight.Bold,
                                                 textAlign = TextAlign.End
                                             )
                                         }
 
+                                    }
+                                }
+                                item {
+                                    Box(modifier = Modifier.width(1.dp)) {
                                     }
                                 }
                             }
@@ -588,4 +657,24 @@ fun Home(viewModel: MainViewModel, navController: NavHostController) {
             }
         }
     }
+}
+
+@Composable
+fun BottomShadow(alpha: Float = 0.1f, width: Dp = 100.dp,height: Dp = 8.dp,yOffset:Dp = 10.dp) {
+    Box(
+        modifier = Modifier
+            .width(width)
+            .height(height)
+            .padding(start = 5.dp, end = 4.dp)
+            .offset(y=yOffset)
+            .clip(shape = RoundedCornerShape(0.dp, 0.dp, 20.dp, 20.dp))
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        Color.Gray.copy(alpha = alpha),
+                        Color.Transparent,
+                    )
+                )
+            )
+    )
 }
